@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 
 from src.core.engine import Database
+from src.core.s3 import S3Client
+from src.documents.router import router as documents_router
 from src.settings import settings
 
 # === Logfire: configure BEFORE creating the app ===
@@ -39,6 +41,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Instrument SQLAlchemy engine for query tracing
         logfire.instrument_sqlalchemy(engine=database._engine.sync_engine)
 
+        # === S3 Client Initialization ===
+        s3_client = S3Client(settings.s3)
+        await stack.enter_async_context(s3_client)
+        app.state.s3 = s3_client
+
         yield
 
 
@@ -59,5 +66,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(documents_router, prefix="/documents", tags=["Documents"])
 
 add_pagination(app)

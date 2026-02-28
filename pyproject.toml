@@ -5,6 +5,7 @@ description = "Trading service for prop project"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiobotocore>=3.2.0",
     "aiosmtplib>=5.1.0",
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
@@ -16,7 +17,10 @@ dependencies = [
     "jinja2>=3.1.6",
     "logfire[fastapi]>=4.24.0",
     "multidict>=6.7.1",
+    "odfpy>=1.4.1",
+    "opentelemetry-instrumentation-httpx>=0.60b1",
     "passlib>=1.7.4",
+    "pgvector>=0.4.2",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.13.0",
     "pyjwt>=2.11.0",
@@ -58,14 +62,18 @@ lint.extend-select = ["I", "W", "B", "I",]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 python_files = ["*_test.py", "*_tests.py", "test_*.py"]
 addopts = "-vv -p no:cacheprovider"
 
 [tool.ruff.lint.flake8-bugbear]
 # Allow default arguments like, e.g., `data: List[str] = fastapi.Query(None)`.
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Form"]
 
 [tool.ty]
 [tool.ty.rules]
 invalid-argument-type = "ignore"  # Starlette CORSMiddleware typing issue
 missing-argument = "ignore"       # Pydantic Settings populated from env at runtime
+unresolved-attribute = "ignore"   # odfpy lacks type stubs (H.qname, P.qname)
+no-matching-overload = "ignore"   # BaseDAO.create kwargs not modeled in overloads

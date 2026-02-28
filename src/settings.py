@@ -26,6 +26,16 @@ class DBSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_prefix="DB_", extra="ignore")
 
 
+class S3Settings(BaseSettings):
+    ENDPOINT_URL: str = ""
+    ACCESS_KEY_ID: str = ""
+    SECRET_ACCESS_KEY: str = ""
+    BUCKET_NAME: str = ""
+    REGION: str = "us-east-1"
+
+    model_config = SettingsConfigDict(env_file=ENV_FILE, env_prefix="S3_", extra="ignore")
+
+
 class Settings(BaseSettings):
     SERVICE_NAME: str = "Template project"
     ENV: Literal["prod", "demo", "test"] = "demo"
@@ -33,6 +43,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Template project"
 
     database: DBSettings = DBSettings()
+    s3: S3Settings = S3Settings()
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 

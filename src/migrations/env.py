@@ -7,7 +7,7 @@ from src.core.engine import Base
 from src.settings import settings
 
 # Import models here so Alembic can detect them for autogenerate.
-# Example: from src.users.models import User  # noqa
+from src.documents.models import Document, DocumentChunk, IngestionRun  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
