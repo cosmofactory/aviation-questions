@@ -7,7 +7,7 @@ from fastapi import APIRouter, Form, UploadFile
 
 from src.core.dependencies import S3ClientDep
 from src.core.sessions import WriteDBSession
-from src.documents.enums import DocType, Jurisdiction
+from src.documents.enums import DocType, Jurisdiction, Language
 from src.documents.schemas import DocumentUploadResponse
 from src.documents.service import DocumentService
 
@@ -22,7 +22,7 @@ async def upload_document(
     title: str = Form(...),
     jurisdiction: Jurisdiction = Form(...),
     doc_type: DocType = Form(...),
-    language: str = Form(default="en"),
+    language: Language = Form(default=Language.EN),
     version_label: str | None = Form(default=None),
     effective_from: date | None = Form(default=None),
     effective_to: date | None = Form(default=None),
@@ -40,7 +40,7 @@ async def upload_document(
         jurisdiction=jurisdiction.value,
         doc_type=doc_type.value,
         source_type="odt",
-        language=language,
+        language=language.value,
         version_label=version_label,
         effective_from=effective_from,
         effective_to=effective_to,

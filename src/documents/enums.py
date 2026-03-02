@@ -31,6 +31,13 @@ class DocType(str, enum.Enum):
     CIRCULAR = "circular"  # information circulars, NOTAMs (long-lived)
 
 
+class Language(str, enum.Enum):
+    """Supported document languages."""
+
+    EN = "eng"
+    RU = "rus"
+
+
 class IngestionStatus(str, enum.Enum):
     """Lifecycle state of an ingestion run."""
 

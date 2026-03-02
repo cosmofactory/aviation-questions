@@ -29,7 +29,7 @@ class DocumentService:
         jurisdiction: str,
         doc_type: str,
         source_type: str,
-        language: str = "en",
+        language: str = "eng",
         version_label: str | None = None,
         effective_from: object = None,
         effective_to: object = None,
@@ -63,13 +63,17 @@ class DocumentService:
         existing = await DocumentDAO.get_first(session, Document.checksum == checksum)
         if existing:
             chunk_count = len(existing.chunks) if existing.chunks else 0
-            warnings.append("Duplicate document: file with identical content already exists.")
-            return DocumentUploadResponse(
-                document_id=existing.id,
-                chunk_count=chunk_count,
-                s3_key=existing.s3_key or "",
-                warnings=warnings,
-            )
+            if chunk_count > 0:
+                warnings.append("Duplicate document: file with identical content already exists.")
+                return DocumentUploadResponse(
+                    document_id=existing.id,
+                    chunk_count=chunk_count,
+                    s3_key=existing.s3_key or "",
+                    warnings=warnings,
+                )
+            # Previous upload produced 0 chunks (parse failure) — delete and re-process
+            await DocumentDAO.delete(session, existing.id)
+            warnings.append("Re-processing: previous upload produced no chunks.")
 
         # 5. Parse ODT
         sections = ODTParser(file_bytes).parse()

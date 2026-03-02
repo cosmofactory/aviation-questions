@@ -34,7 +34,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.models import TimeStampedModel
 from src.documents.constants import EMBEDDING_DIM
-from src.documents.enums import DocType, IngestionStatus, Jurisdiction, SourceType
+from src.documents.enums import DocType, IngestionStatus, Jurisdiction, Language, SourceType
 
 # ---------------------------------------------------------------------------
 # 1) documents — one row per ingested aviation-law document version.
@@ -95,10 +95,16 @@ class Document(TimeStampedModel):
         ),
         comment="Functional category: regulation, manual, guidance, etc.",
     )
-    language: Mapped[str] = mapped_column(
-        String(10),
-        server_default=text("'en'"),
-        comment="ISO 639-1 language code, e.g. 'en', 'fr', 'de'",
+    language: Mapped[Language] = mapped_column(
+        Enum(
+            Language,
+            name="language",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
+        server_default=text("'eng'"),
+        comment="Document language: 'eng' (English), 'rus' (Russian)",
     )
 
     # -- versioning --
