@@ -126,13 +126,16 @@ class DocumentService:
                 ]
                 await DocumentChunkDAO.bulk_create(session, chunk_dicts)
 
-        except Exception:
+        except Exception as exc:
             # Best-effort S3 cleanup on DB failure
             try:
                 await s3_client.delete(key=s3_key)
             except Exception:
                 logger.exception("Failed to clean up S3 object %s after DB error", s3_key)
-            raise
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to persist document: {exc}",
+            ) from exc
 
         return DocumentUploadResponse(
             document_id=document.id,

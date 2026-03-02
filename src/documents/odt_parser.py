@@ -37,10 +37,13 @@ class ODTParser:
         heading_stack: list[tuple[int, str]] = []
         current_section: ParsedSection | None = None
 
+        _h_qname = (TEXTNS, "h")
+        _p_qname = (TEXTNS, "p")
+
         for element in self._doc.text.childNodes:
             tag = element.qname
 
-            if tag == H.qname:
+            if tag == _h_qname:
                 level = int(element.getAttribute("outlinelevel") or 1)
                 text = self._extract_text(element)
                 if not text.strip():
@@ -56,7 +59,7 @@ class ODTParser:
                 )
                 sections.append(current_section)
 
-            elif tag == P.qname:
+            elif tag == _p_qname:
                 text = self._extract_text(element)
                 if not text.strip():
                     continue

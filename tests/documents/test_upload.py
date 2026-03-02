@@ -75,9 +75,7 @@ async def test_upload_odt_creates_document_and_chunks(ac: AsyncClient, mock_s3: 
         assert doc.title == "Test Regulation"
         assert doc.s3_key == data["s3_key"]
 
-        result = await s.execute(
-            select(DocumentChunk).where(DocumentChunk.document_id == doc_id)
-        )
+        result = await s.execute(select(DocumentChunk).where(DocumentChunk.document_id == doc_id))
         chunks = result.scalars().all()
         assert len(chunks) == data["chunk_count"]
 

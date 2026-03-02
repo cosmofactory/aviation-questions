@@ -59,7 +59,13 @@ class Document(TimeStampedModel):
         comment="Human-readable document title, e.g. 'Regulation (EU) 965/2012'",
     )
     source_type: Mapped[SourceType] = mapped_column(
-        Enum(SourceType, name="source_type", native_enum=True, create_constraint=True, values_callable=lambda e: [x.value for x in e]),
+        Enum(
+            SourceType,
+            name="source_type",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         comment="Original file format before ingestion",
     )
     source_uri: Mapped[str | None] = mapped_column(
@@ -70,11 +76,23 @@ class Document(TimeStampedModel):
 
     # -- classification --
     jurisdiction: Mapped[Jurisdiction] = mapped_column(
-        Enum(Jurisdiction, name="jurisdiction", native_enum=True, create_constraint=True, values_callable=lambda e: [x.value for x in e]),
+        Enum(
+            Jurisdiction,
+            name="jurisdiction",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         comment="Regulatory body that issued the document",
     )
     doc_type: Mapped[DocType] = mapped_column(
-        Enum(DocType, name="doc_type", native_enum=True, create_constraint=True, values_callable=lambda e: [x.value for x in e]),
+        Enum(
+            DocType,
+            name="doc_type",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         comment="Functional category: regulation, manual, guidance, etc.",
     )
     language: Mapped[str] = mapped_column(
@@ -311,7 +329,13 @@ class IngestionRun(TimeStampedModel):
 
     # -- run metadata --
     status: Mapped[IngestionStatus] = mapped_column(
-        Enum(IngestionStatus, name="ingestion_status", native_enum=True, create_constraint=True, values_callable=lambda e: [x.value for x in e]),
+        Enum(
+            IngestionStatus,
+            name="ingestion_status",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda e: [x.value for x in e],
+        ),
         server_default=text("'started'"),
         comment="Lifecycle state: started → success | failed",
     )
