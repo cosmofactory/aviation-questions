@@ -5,7 +5,7 @@ from datetime import date
 
 from fastapi import APIRouter, Form, UploadFile
 
-from src.core.dependencies import S3ClientDep
+from src.core.dependencies import EmbeddingClientDep, S3ClientDep
 from src.core.sessions import WriteDBSession
 from src.documents.enums import DocType, Jurisdiction, Language
 from src.documents.schemas import DocumentUploadResponse
@@ -19,6 +19,7 @@ async def upload_document(
     file: UploadFile,
     session: WriteDBSession,
     s3_client: S3ClientDep,
+    embedding_client: EmbeddingClientDep,
     title: str = Form(...),
     jurisdiction: Jurisdiction = Form(...),
     doc_type: DocType = Form(...),
@@ -35,6 +36,7 @@ async def upload_document(
     return await DocumentService.upload_document(
         session=session,
         s3_client=s3_client,
+        embedding_client=embedding_client,
         file=file,
         title=title,
         jurisdiction=jurisdiction.value,

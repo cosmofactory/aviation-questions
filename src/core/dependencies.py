@@ -5,6 +5,7 @@ import httpx
 from fastapi import Depends, Request
 from fastapi_pagination.limit_offset import LimitOffsetParams
 
+from src.core.embedding import EmbeddingClient
 from src.core.s3 import S3Client
 
 
@@ -27,3 +28,10 @@ async def get_s3_client(request: Request) -> S3Client:
 
 
 S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
+
+
+async def get_embedding_client(request: Request) -> EmbeddingClient:
+    return request.app.state.embedding_client
+
+
+EmbeddingClientDep = Annotated[EmbeddingClient, Depends(get_embedding_client)]

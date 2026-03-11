@@ -8,6 +8,7 @@ from src.settings import settings
 
 # Import models here so Alembic can detect them for autogenerate.
 from src.documents.models import Document, DocumentChunk, IngestionRun  # noqa: F401
+from src.questions.models import QuestionLog  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

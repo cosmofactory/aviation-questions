@@ -7,6 +7,7 @@ from pathlib import PurePosixPath
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.embedding import EmbeddingClient
 from src.core.s3 import S3Client
 from src.documents.chunker import DocumentChunker
 from src.documents.constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE_BYTES, ODT_CONTENT_TYPE
@@ -23,6 +24,7 @@ class DocumentService:
     async def upload_document(
         session: AsyncSession,
         s3_client: S3Client,
+        embedding_client: EmbeddingClient,
         file: UploadFile,
         *,
         title: str,
@@ -128,7 +130,21 @@ class DocumentService:
                     }
                     for c in chunks
                 ]
-                await DocumentChunkDAO.bulk_create(session, chunk_dicts)
+                created_chunks = await DocumentChunkDAO.bulk_create(session, chunk_dicts)
+
+                # Generate and store embeddings
+                texts = [c.text for c in created_chunks]
+                embeddings = await embedding_client.embed_texts(texts)
+                embedding_model = embedding_client._model
+                update_dicts = [
+                    {
+                        "id": created_chunks[i].id,
+                        "embedding": embeddings[i],
+                        "embedding_model": embedding_model,
+                    }
+                    for i in range(len(created_chunks))
+                ]
+                await DocumentChunkDAO.bulk_update(session, update_dicts)
 
         except Exception as exc:
             # Best-effort S3 cleanup on DB failure
@@ -147,3 +163,30 @@ class DocumentService:
             s3_key=s3_key,
             warnings=warnings,
         )
+
+    @staticmethod
+    async def search_similar_chunks(
+        session: AsyncSession,
+        query_embedding: list[float],
+        top_k: int = 5,
+    ) -> list[dict]:
+        """Search for similar chunks and return enriched results with document metadata."""
+        results = await DocumentChunkDAO.search_similar(session, query_embedding, top_k)
+
+        enriched: list[dict] = []
+        for chunk, distance in results:
+            doc: Document = chunk.document  # selectin-loaded
+            enriched.append(
+                {
+                    "chunk_id": str(chunk.id),
+                    "text": chunk.text,
+                    "citation": chunk.citation,
+                    "section_path": chunk.section_path,
+                    "heading": chunk.heading,
+                    "document_title": doc.title,
+                    "jurisdiction": doc.jurisdiction.value,
+                    "doc_type": doc.doc_type.value,
+                    "distance": distance,
+                }
+            )
+        return enriched

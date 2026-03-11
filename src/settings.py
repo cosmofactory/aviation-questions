@@ -26,6 +26,14 @@ class DBSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_prefix="DB_", extra="ignore")
 
 
+class OpenAISettings(BaseSettings):
+    API_KEY: str
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    CHAT_MODEL: str = "openai:gpt-4o-mini"
+
+    model_config = SettingsConfigDict(env_file=ENV_FILE, env_prefix="OPENAI_", extra="ignore")
+
+
 class S3Settings(BaseSettings):
     ENDPOINT_URL: str = ""
     ACCESS_KEY_ID: str = ""
@@ -44,6 +52,7 @@ class Settings(BaseSettings):
 
     database: DBSettings = DBSettings()
     s3: S3Settings = S3Settings()
+    openai: OpenAISettings = OpenAISettings()
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 

@@ -7,10 +7,11 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from src.core.dependencies import get_s3_client
+from src.core.dependencies import get_embedding_client, get_s3_client
 from src.core.engine import Base
 from src.core.sessions import get_read_session, get_write_session
 from src.documents import models as _documents_models  # noqa: F401 — register models with Base
+from src.questions import models as _questions_models  # noqa: F401 — register models with Base
 from src.settings import settings
 
 # Build the test database URL from settings, appending "_test" to the DB name
@@ -81,7 +82,19 @@ def mock_s3() -> AsyncMock:
 
 
 @pytest.fixture
-async def ac(mock_s3: AsyncMock) -> AsyncGenerator[AsyncClient, None]:
+def mock_embedding_client() -> AsyncMock:
+    """Provide a mock EmbeddingClient that returns zero vectors."""
+    client = AsyncMock()
+    client._model = "text-embedding-3-small"
+    client.embed_text = AsyncMock(return_value=[0.0] * 1536)
+    client.embed_texts = AsyncMock(side_effect=lambda texts: [[0.0] * 1536 for _ in texts])
+    return client
+
+
+@pytest.fixture
+async def ac(
+    mock_s3: AsyncMock, mock_embedding_client: AsyncMock
+) -> AsyncGenerator[AsyncClient, None]:
     """Provide an AsyncClient with test DB session and mock S3 overrides.
 
     Uses independent sessions from the test engine (not the shared transactional
@@ -101,6 +114,7 @@ async def ac(mock_s3: AsyncMock) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_read_session] = override_read_session
     app.dependency_overrides[get_write_session] = override_write_session
     app.dependency_overrides[get_s3_client] = lambda: mock_s3
+    app.dependency_overrides[get_embedding_client] = lambda: mock_embedding_client
 
     async with AsyncClient(
         transport=ASGITransport(app=app),

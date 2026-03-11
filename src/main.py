@@ -6,9 +6,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 
+from src.core.embedding import EmbeddingClient
 from src.core.engine import Database
 from src.core.s3 import S3Client
 from src.documents.router import router as documents_router
+from src.questions.router import router as questions_router
 from src.settings import settings
 
 # === Logfire: configure BEFORE creating the app ===
@@ -46,6 +48,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await stack.enter_async_context(s3_client)
         app.state.s3 = s3_client
 
+        # === Embedding Client Initialization ===
+        embedding_client = EmbeddingClient(settings.openai)
+        await stack.enter_async_context(embedding_client)
+        app.state.embedding_client = embedding_client
+
         yield
 
 
@@ -68,5 +75,6 @@ app.add_middleware(
 )
 
 app.include_router(documents_router, prefix="/documents", tags=["Documents"])
+app.include_router(questions_router, prefix="/questions", tags=["Questions"])
 
 add_pagination(app)
