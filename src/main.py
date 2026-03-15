@@ -23,6 +23,11 @@ logfire.configure(
 
 # Instrument frameworks before creating clients/app
 logfire.instrument_httpx()
+logfire.instrument_pydantic_ai(
+    include_content=settings.LOGFIRE_PYDANTIC_AI_INCLUDE_CONTENT,
+    include_binary_content=settings.LOGFIRE_PYDANTIC_AI_INCLUDE_BINARY_CONTENT,
+    version=settings.LOGFIRE_PYDANTIC_AI_VERSION,
+)
 
 
 @asynccontextmanager

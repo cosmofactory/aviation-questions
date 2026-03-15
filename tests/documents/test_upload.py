@@ -6,7 +6,7 @@ from sqlalchemy import select
 from src.documents.dao import DocumentChunkDAO
 from src.documents.models import Document, DocumentChunk
 from src.documents.odt_parser import ODTParser
-from tests.conftest import test_session_factory
+from tests.conftest import db_session_factory
 from tests.documents.conftest import create_test_odt, create_test_odt_with_lists
 
 UPLOAD_URL = "/documents/upload"
@@ -69,7 +69,7 @@ async def test_upload_odt_creates_document_and_chunks(ac: AsyncClient, mock_s3: 
 
     # Verify document and chunks in DB
     doc_id = data["document_id"]
-    async with test_session_factory() as s:
+    async with db_session_factory() as s:
         result = await s.execute(select(Document).where(Document.id == doc_id))
         doc = result.scalars().first()
         assert doc is not None
@@ -142,7 +142,7 @@ async def test_upload_odt_with_nested_lists(ac: AsyncClient, mock_s3: AsyncMock)
 
     # Verify the list-item text actually made it into chunks
     doc_id = data["document_id"]
-    async with test_session_factory() as s:
+    async with db_session_factory() as s:
         result = await s.execute(select(DocumentChunk).where(DocumentChunk.document_id == doc_id))
         chunks = result.scalars().all()
         all_text = " ".join(c.text for c in chunks)
@@ -196,7 +196,7 @@ async def test_reprocess_zero_chunk_duplicate(ac: AsyncClient, mock_s3: AsyncMoc
     assert data2["document_id"] != old_doc_id
 
     # Old document should no longer exist
-    async with test_session_factory() as s:
+    async with db_session_factory() as s:
         result = await s.execute(select(Document).where(Document.id == old_doc_id))
         assert result.scalars().first() is None
 

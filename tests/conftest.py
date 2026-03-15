@@ -21,7 +21,7 @@ TEST_DATABASE_URL = (
 )
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-test_session_factory = async_sessionmaker(test_engine, expire_on_commit=False)
+db_session_factory = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
 @pytest.fixture(scope="session")
@@ -64,7 +64,7 @@ async def setup_database():
 @pytest.fixture
 async def session() -> AsyncGenerator[AsyncSession, None]:
     """Provide a transactional session that rolls back after each test."""
-    async with test_session_factory() as session:
+    async with db_session_factory() as session:
         async with session.begin():
             yield session
             await session.rollback()
@@ -103,11 +103,11 @@ async def ac(
     from src.main import app
 
     async def override_read_session():
-        async with test_session_factory() as s:
+        async with db_session_factory() as s:
             yield s
 
     async def override_write_session():
-        async with test_session_factory() as s:
+        async with db_session_factory() as s:
             async with s.begin():
                 yield s
 

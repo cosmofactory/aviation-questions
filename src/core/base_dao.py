@@ -338,7 +338,7 @@ class BaseDAO:
             await UserOrderDAO.delete(session, 123)
         """
         stmt = delete(cls.model).where(cls.model.id == id)
-        result: CursorResult = await db.execute(stmt)  # type: ignore[assignment]
+        result: CursorResult = await db.execute(stmt)
         await db.flush()
         if (result.rowcount or 0) == 0:
             raise ObjectNotFoundException(f"Object of type {cls.model.__name__} not found.")
@@ -454,7 +454,7 @@ class BaseDAO:
         for i in range(0, len(ids), batch_size):
             chunk = ids[i : i + batch_size]
             stmt = delete(cls.model).where(cls.model.id.in_(chunk))
-            result: CursorResult = await db.execute(stmt)  # type: ignore[assignment]
+            result: CursorResult = await db.execute(stmt)
             await db.flush()
             total_deleted += result.rowcount or 0
         return total_deleted

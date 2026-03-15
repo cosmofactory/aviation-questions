@@ -29,6 +29,10 @@ class DBSettings(BaseSettings):
 class OpenAISettings(BaseSettings):
     API_KEY: str
     EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_DIMENSIONS: int = 1536
+    EMBEDDING_INSTRUMENT: bool = True
+    EMBEDDING_INSTRUMENT_INCLUDE_CONTENT: bool = False
+    EMBEDDING_INSTRUMENT_INCLUDE_BINARY_CONTENT: bool = False
     CHAT_MODEL: str = "openai:gpt-4o-mini"
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_prefix="OPENAI_", extra="ignore")
@@ -48,6 +52,9 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "Template project"
     ENV: Literal["prod", "demo", "test"] = "demo"
     LOGFIRE_TOKEN: str | None = None
+    LOGFIRE_PYDANTIC_AI_INCLUDE_CONTENT: bool = True
+    LOGFIRE_PYDANTIC_AI_INCLUDE_BINARY_CONTENT: bool = False
+    LOGFIRE_PYDANTIC_AI_VERSION: Literal[1, 2, 3] = 2
     PROJECT_NAME: str = "Template project"
 
     database: DBSettings = DBSettings()
