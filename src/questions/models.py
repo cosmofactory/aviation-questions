@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from sqlalchemy import Integer, String, Text
+import uuid
+
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -22,3 +24,20 @@ class QuestionLog(TimeStampedModel):
     )
     model: Mapped[str] = mapped_column(String(200), comment="LLM model used for generation")
     top_k: Mapped[int] = mapped_column(Integer, comment="Number of chunks retrieved")
+
+    root_question_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("question_logs.id"),
+        index=True,
+        comment="Root question id for this Q&A thread",
+    )
+    parent_question_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("question_logs.id"),
+        nullable=True,
+        index=True,
+        comment="Immediate previous question id for supplementary turns",
+    )
+    follow_up_index: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        comment="0 for root question, 1..N for supplementary questions",
+    )

@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.core.base_dao import BaseDAO
 from src.documents.models import Document, DocumentChunk, IngestionRun
@@ -27,6 +28,7 @@ class DocumentChunkDAO(BaseDAO):
         distance = DocumentChunk.embedding.cosine_distance(query_embedding).label("distance")
         stmt = (
             select(DocumentChunk, distance)
+            .options(selectinload(DocumentChunk.document))
             .where(DocumentChunk.embedding.is_not(None))
             .order_by(distance)
             .limit(top_k)

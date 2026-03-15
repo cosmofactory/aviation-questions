@@ -19,4 +19,5 @@ async def ask_question(
         embedding_client=embedding_client,
         question=data.question,
         top_k=data.top_k,
+        follow_up_to_question_id=data.follow_up_to_question_id,
     )

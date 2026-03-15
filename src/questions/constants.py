@@ -1,5 +1,6 @@
 DEFAULT_TOP_K = 5
 MAX_TOP_K = 20
+MAX_SUPPLEMENTARY_QUESTIONS = 3
 
 SYSTEM_PROMPT = """\
 You are an aviation law expert assistant. Your role is to answer questions about \
